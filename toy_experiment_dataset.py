@@ -50,7 +50,6 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
         np.testing.assert_allclose(np.sum(component_probs), 1.0)
         num_components = component_probs.shape[0]
         assert component_means.shape[0] == num_components
-
         desired_shape = (number_of_elements,) + component_means.shape
 
         std_norm = random.normal(size=desired_shape)
@@ -62,7 +61,7 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
         )
         chosen_components = chosen_components.reshape(-1, 1, 1)
         chosen_values = np.take_along_axis(norm, chosen_components, axis=1)
-        return chosen_values
+        return chosen_values[:, 0, :]
 
     def __init__(self,
                  component_probs: np.array,
