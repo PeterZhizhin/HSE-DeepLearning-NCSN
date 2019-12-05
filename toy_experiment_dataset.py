@@ -1,43 +1,7 @@
 import numpy as np
 import torch.utils.data
 import torch
-
-
-def gather(self, dim, index):
-    """
-    Gathers values along an axis specified by ``dim``.
-
-    Taken from this StackOverflow question:
-    https://stackoverflow.com/questions/46868056/how-to-gather-elements-of-specific-indices-in-numpy/46868165
-
-    For a 3-D tensor the output is specified by:
-        out[i][j][k] = input[index[i][j][k]][j][k]  # if dim == 0
-        out[i][j][k] = input[i][index[i][j][k]][k]  # if dim == 1
-        out[i][j][k] = input[i][j][index[i][j][k]]  # if dim == 2
-
-    Parameters
-    ----------
-    dim:
-        The axis along which to index
-    index:
-        A tensor of indices of elements to gather
-
-    Returns
-    -------
-    Output Tensor
-    """
-    idx_xsection_shape = index.shape[:dim] + \
-                         index.shape[dim + 1:]
-    self_xsection_shape = self.shape[:dim] + self.shape[dim + 1:]
-    if idx_xsection_shape != self_xsection_shape:
-        raise ValueError("Except for dimension " + str(dim) +
-                         ", all dimensions of index and self should be the same size")
-    if index.dtype != np.dtype('int_'):
-        raise TypeError("The values of index must be integers")
-    data_swaped = np.swapaxes(self, 0, dim)
-    index_swaped = np.swapaxes(index, 0, dim)
-    gathered = np.choose(index_swaped, data_swaped)
-    return np.swapaxes(gathered, 0, dim)
+import torch.distributions as td
 
 
 class ToyExperimentDataset(torch.utils.data.TensorDataset):
@@ -69,6 +33,28 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
                  number_of_elements: int,
                  random_seed=1337):
         self.random = np.random.RandomState(random_seed)
+        self.component_probs = component_probs
+        self.component_means = component_means
         numpy_dataset = self.generate_numpy_dataset(component_probs, component_means, number_of_elements, self.random)
         self.torch_dataset = torch.from_numpy(numpy_dataset)
         super().__init__(self.torch_dataset)
+
+    def compute_p_gradient(self, x: np.array):
+        x = torch.tensor(x, requires_grad=True).double()
+        log_probs = []
+        for mean, prob in zip(self.component_means, self.component_probs):
+            dist = td.multivariate_normal.MultivariateNormal(
+                torch.tensor(mean, requires_grad=True).double(),
+                torch.eye(mean.shape[0], requires_grad=True).double()
+            )
+            log_prob_comp = torch.ones(1, requires_grad=True) * np.log(prob)
+            log_prob_dist = dist.log_prob(x)
+            log_probs.append(log_prob_dist + log_prob_comp)
+        log_probs = torch.stack(log_probs, dim=0)
+        total_log_prob = torch.logsumexp(log_probs, dim=0)
+        # total_prob = torch.exp(total_log_prob)
+        # Only one x contribues to each part of the sum
+        total_prob_sum = torch.sum(total_log_prob)
+
+        gradient = torch.autograd.grad(outputs=total_prob_sum, inputs=x)[0]
+        return gradient
