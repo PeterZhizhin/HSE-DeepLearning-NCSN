@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+
+
 class ModelMLP(object):
 	"""docstring for ModelMLP"""
 	def __init__(self, hidden_size=128):
