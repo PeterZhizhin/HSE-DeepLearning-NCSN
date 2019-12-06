@@ -10,14 +10,15 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
                                component_probs,
                                component_means,
                                number_of_elements,
-                               random):
+                               random,
+                               sigma=1):
         np.testing.assert_allclose(np.sum(component_probs), 1.0)
         num_components = component_probs.shape[0]
         assert component_means.shape[0] == num_components
         desired_shape = (number_of_elements,) + component_means.shape
 
         std_norm = random.normal(size=desired_shape)
-        norm = std_norm + component_means[None]
+        norm = std_norm * sigma + component_means[None]
         chosen_components = random.choice(
             np.arange(num_components, dtype=np.int),
             replace=True, p=component_probs,
@@ -31,10 +32,12 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
                  component_probs: np.array,
                  component_means: np.array,
                  number_of_elements: int,
-                 random_seed=1337):
+                 random_seed=1337,
+                 sigma=1):
         self.random = np.random.RandomState(random_seed)
         self.component_probs = component_probs
         self.component_means = component_means
+        self.sigma = sigma
         numpy_dataset = self.generate_numpy_dataset(component_probs, component_means, number_of_elements, self.random)
         self.torch_dataset = torch.from_numpy(numpy_dataset)
         super().__init__(self.torch_dataset)
@@ -45,9 +48,9 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
         for mean, prob in zip(self.component_means, self.component_probs):
             dist = td.multivariate_normal.MultivariateNormal(
                 torch.tensor(mean, requires_grad=True).double(),
-                torch.eye(mean.shape[0], requires_grad=True).double()
+                torch.eye(mean.shape[0], requires_grad=True).double() * self.sigma
             )
-            log_prob_comp = torch.ones(1, requires_grad=True) * np.log(prob)
+            log_prob_comp = torch.ones(1, requires_grad=True).double() * np.log(prob)
             log_prob_dist = dist.log_prob(x)
             log_probs.append(log_prob_dist + log_prob_comp)
         log_probs = torch.stack(log_probs, dim=0)
@@ -58,3 +61,8 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
 
         gradient = torch.autograd.grad(outputs=total_prob_sum, inputs=x)[0]
         return gradient
+
+
+
+
+
