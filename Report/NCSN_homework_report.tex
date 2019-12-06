@@ -1,0 +1,149 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2018
+
+% ready for submission
+% \usepackage{neurips_2018}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2018}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+     \usepackage[final, nonatbib]{nips_2018}
+
+% to avoid loading the natbib package, add option nonatbib:
+%     \usepackage[nonatbib]{neurips_2018}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+%\usepackage[cp1251]{inputenc}
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[main=russian, english]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsfonts,amsmath,amssymb}
+%\usepackage{natbib}
+
+\title{Отчет по воспроизведению статьи "Generative Modeling by Estimating Gradients of the Data Distribution"}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+  Петр Жижин \\
+  Факультет Компьютерных наук\\
+  ВШЭ\\
+  \texttt{??} \\
+  % examples of more authors
+   \and
+   Даяна Савостьянова \\
+   Факультет Компьютерных наук\\
+   ВШЭ\\
+   \texttt{dayanamuha@gmail.com} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+\begin{abstract}
+  Данная работа включает в себя результаты попытки воспроизведения статьи 
+  "Generative Modeling by Estimating Gradients of the Data Distribution". Финальной целью является получение схожих со статьей результатов. На данный момент работа содержит проверку начальных экспериментов статьи.
+  
+  Работа устроена следующим образом, для начала расссмотрим статью, которая является основой для этой работы, далее рассмотрим нашу реализацию определенных частей статьи, подведем результаты о возможности аопсроизведения каждой из частей.
+\end{abstract}
+
+
+\section{Обзор статьи}
+
+В обозреваемой статье предлагается вариант генеративной модели, использующей динамику Ланжевена основанную на оценке градиентов распределения данных с помощью score matching. В качестве архитектуры в модели используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификацией функции активации (ELU), 
+
+\section{Модель}
+
+\section{Лосс}
+
+\section{Эксперимент на смеси гауссовских распределений}
+
+\subsection{Toy Experiment №1}
+Повторим эксперимент из статьи, чтобы показать, что ssm-лосс адекватно оценивает градиент. В качестве модели был использован MLP (Multi-Layer Perceptron) с тремя слоями с размером скрытого 128 и с функцией активации Softplus. Данные генерировались из смеси распределений 
+$\frac{1}{5} \mathcal{N}\left( \left( -5, -5\right), I \right)+\frac{4}{5} \mathcal{N}\left( \left( 5, 5\right), I \right)$. В качестве оптимизатора был взят Adam с lr = 0.001 с размером батча 128. 
+
+\begin{figure}[H]
+  \centering
+  	\includegraphics[scale=0.5]{fig2a}
+  	\caption{$\Delta_x \log p_{data}$}
+  	\label{fig:2a}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{fig2b}
+	\caption{MNIST}
+	\label{fig:2b}
+\end{figure}
+
+\subsection{Toy Experiment №2}
+
+
+
+
+
+
+
+
+
+
+\subsection{Figures}
+
+%\begin{figure}
+%  \centering
+%  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+%  \caption{Sample figure caption.}
+%\end{figure}
+
+All artwork must be neat, clean, and legible. Lines should be dark enough for
+purposes of reproduction. The figure number and caption always appear after the
+figure. Place one line space before the figure caption and one line space after
+the figure. The figure caption should be lower case (except for first word and
+proper nouns); figures are numbered consecutively.
+
+You may use color figures.  However, it is best for the figure captions and the
+paper body to be legible if the paper is printed in either black/white or in
+color.
+
+
+%\section*{References}
+
+\bibliographystyle{unsrt} 
+\bibliography{rev} 
+
+\end{document}
