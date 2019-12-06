@@ -2,6 +2,7 @@ import numpy as np
 import torch.utils.data
 import torch
 import torch.distributions as td
+import typing
 
 
 class ToyExperimentDataset(torch.utils.data.TensorDataset):
@@ -42,8 +43,9 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
         self.torch_dataset = torch.from_numpy(numpy_dataset)
         super().__init__(self.torch_dataset)
 
-    def compute_p_gradient(self, x: np.array):
-        x = torch.tensor(x, requires_grad=True).double()
+    def compute_log_p(self, x: typing.Union[np.array, torch.Tensor]) -> torch.Tensor:
+        if isinstance(x, np.ndarray):
+            x = torch.tensor(x, requires_grad=True).double()
         log_probs = []
         for mean, prob in zip(self.component_means, self.component_probs):
             dist = td.multivariate_normal.MultivariateNormal(
@@ -55,6 +57,11 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
             log_probs.append(log_prob_dist + log_prob_comp)
         log_probs = torch.stack(log_probs, dim=0)
         total_log_prob = torch.logsumexp(log_probs, dim=0)
+        return total_log_prob
+
+    def compute_p_gradient(self, x: typing.Union[np.array, torch.Tensor]):
+        x = torch.tensor(x, requires_grad=True).double()
+        total_log_prob = self.compute_log_p(x)
         # total_prob = torch.exp(total_log_prob)
         # Only one x contribues to each part of the sum
         total_prob_sum = torch.sum(total_log_prob)
