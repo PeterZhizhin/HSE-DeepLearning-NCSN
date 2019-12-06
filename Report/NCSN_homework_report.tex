@@ -241,6 +241,28 @@ $\sigma_i$ из геометрической прогрессии, где $\sigm
 
 \section{Реализации на данный момент}
 
+\subsection{Обуславливание нейронной сети на параметр $\sigma$}
+
+Для корректной работы алгоритма Ланжевена с отжигом, необходимо каким-то образом обуславливать модель
+на уровень добавляемого в данные шума. Для этого мы повторяем тот же метод обуслаливания, который
+применялся в статье. Он называется CondInstanceNorm++ и работает следующим образом:
+
+Пусть $x$ --- это картинка с $C$ каналов. $\mu_k$ --- это среднее значение яркости пикселя в изображении
+$x$ для канала $k$. $s_k$ --- это стандартное отклонение яркости пикселя на канале $k$.
+Так же считаются $m$ и $v$ --- оценки среднего и стандартного $\mu_k$ по всем каналам $k=1\ldots C$.
+
+Обуславливание на уровень шума происходит таким образом, что для разного $\sigma_i$ выбираются разные
+параметры нормализации. Тогда нормализованное изображение $z_k$ задаётся следующим образом:
+
+\[
+z_k = \gamma[i, k] \frac{x_k - \mu_k}{s_k} + \beta[i,k] + \alpha[i,k]\frac{\mu_k - m}{v}
+\]
+
+$i$ --- это индекс внедряемого шума.
+$\gamma \in \mathbb{R}^{L \times C}$, $\beta \in \mathbb{R}^{L \times C}$, $\alpha \in \mathbb{R}^{L \times C}$
+
+$L$ --- это количество различных шумов, которые мы внедряем в модель при отжиге.
+
 Так же кроме предыдущих экспериментов были реализованы методы динамик Ланжевена для генерации картинок.
 
 
@@ -250,30 +272,5 @@ $\sigma_i$ из геометрической прогрессии, где $\sigm
 \bibliography{rev} 
 
 \section{Appendix}
-
-\begin{wrapfigure}[15]{r}{0.5\textwidth}
-	\vspace{-2.2em}
-	\begin{minipage}{0.5\textwidth}
-		\begin{algorithm}[H]
-			\caption{Annealed Langevin dynamics.}
-			\label{alg:anneal}
-			\begin{algorithmic}[1]
-				\Require{$\{\sigma_i\}_{i=1}^L, \epsilon, T$.}
-				\State{Initialize $\tilde{\bfx}_0$}
-				\For{$i \gets 1$ to $L$}
-				\State{$\alpha_i \gets \epsilon \cdot \sigma_i^2/\sigma_L^2$} \Comment{$\alpha_i$ is the step size.}
-				\For{$t \gets 1$ to $T$}
-				\State{Draw $\bfz_t \sim \mcal{N}(0, I)$}
-				\State{\resizebox{0.75\textwidth}{!}{$\tilde{\bfx}_{t} \gets \tilde{\bfx}_{t-1} + \dfrac{\alpha_i}{2} \bfs_\bftheta(\tilde{\bfx}_{t-1}, \sigma_i) + \sqrt{\alpha_i}~ \bfz_t$}}
-				\EndFor
-				\State{$\tilde{\bfx}_0 \gets \tilde{\bfx}_T$}
-				\EndFor
-				\item[]
-				\Return{$\tilde{\bfx}_T$}
-			\end{algorithmic}
-		\end{algorithm}
-	\end{minipage}
-\end{wrapfigure}
-
 
 \end{document}
