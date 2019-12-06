@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import torch.nn as nn
 import torch.nn.functional as F
+import cond_instance_norm_plus_plus
+import sequential_with_sigmas
 
 
 def batchnorm(in_planes):
@@ -65,49 +67,61 @@ def convbnrelu(in_planes, out_planes, kernel_size, stride=1, groups=1, act=True)
 
 class CRPBlock(nn.Module):
 
-    def __init__(self, in_planes, out_planes, n_stages):
+    def __init__(self, in_planes, out_planes, n_stages, num_sigmas):
         super(CRPBlock, self).__init__()
-        for i in range(n_stages):
-            setattr(self, '{}_{}'.format(i + 1, 'outvar_dimred'),
-                    conv3x3(in_planes if (i == 0) else out_planes,
-                            out_planes, stride=1,
-                            bias=False))
+        self.stages = nn.ModuleList(
+            [self.generate_stage(in_planes if i == 0 else out_planes, out_planes, num_sigmas) for i in range(n_stages)]
+        )
         self.stride = 1
         self.n_stages = n_stages
-        self.maxpool = nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
 
-    def forward(self, x):
+    def generate_stage(self, in_planes, out_planes, num_sigmas):
+        return sequential_with_sigmas.SequentialWithSigmas(
+            cond_instance_norm_plus_plus.ConditionalInstanceNormalizationPlusPlus(num_sigmas, in_planes),
+            nn.MaxPool2d(kernel_size=5, stride=1, padding=2),
+            conv3x3(in_planes, out_planes, stride=1, bias=False),
+        )
+
+    def forward(self, x, sigma_idx):
         top = x
         for i in range(self.n_stages):
-            top = self.maxpool(top)
-            top = getattr(self, '{}_{}'.format(i + 1, 'outvar_dimred'))(top)
+            top = self.stages[i](top, sigma_idx)
             x = top + x
         return x
 
 
-stages_suffixes = {0: '_conv',
-                   1: '_conv_relu_varout_dimred'}
-
-
 class RCUBlock(nn.Module):
-
-    def __init__(self, in_planes, out_planes, n_blocks, n_stages):
+    def __init__(self, in_planes, out_planes, n_blocks, n_stages, num_sigmas):
         super(RCUBlock, self).__init__()
+        self.blocks = nn.ModuleList()
         for i in range(n_blocks):
+            stages = nn.ModuleList()
             for j in range(n_stages):
-                setattr(self, '{}{}'.format(i + 1, stages_suffixes[j]),
-                        conv3x3(in_planes if (i == 0) and (j == 0) else out_planes,
-                                out_planes, stride=1,
-                                bias=(j == 0)))
+                stages.append(
+                    self.generate_stage(
+                        in_planes if (i == 0) and (j == 0) else out_planes,
+                        out_planes,
+                        num_sigmas,
+                        bias=(j == 0),
+                    )
+                )
+            self.blocks.append(stages)
+
         self.stride = 1
         self.n_blocks = n_blocks
         self.n_stages = n_stages
 
-    def forward(self, x):
+    def generate_stage(self, in_planes, out_planes, num_sigmas, bias=False):
+        return sequential_with_sigmas.SequentialWithSigmas(
+            cond_instance_norm_plus_plus.ConditionalInstanceNormalizationPlusPlus(num_sigmas, in_planes),
+            nn.ELU(),
+            conv3x3(in_planes, out_planes, stride=1, bias=bias)
+        )
+
+    def forward(self, x, sigmas_idx):
         for i in range(self.n_blocks):
             residual = x
             for j in range(self.n_stages):
-                x = F.relu(x)
-                x = getattr(self, '{}{}'.format(i + 1, stages_suffixes[j]))(x)
+                x = self.blocks[i][j](x, sigmas_idx)
             x += residual
         return x
