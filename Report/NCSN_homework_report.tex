@@ -30,6 +30,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{amsfonts,amsmath,amssymb}
+\usepackage{subcaption}
 %\usepackage{natbib}
 
 \title{Отчет по воспроизведению статьи "Generative Modeling by Estimating Gradients of the Data Distribution"}
@@ -46,7 +47,7 @@
   Петр Жижин \\
   Факультет Компьютерных наук\\
   ВШЭ\\
-  \texttt{??} \\
+  \texttt{piter.zh@gmail.com} \\
   % examples of more authors
    \and
    Даяна Савостьянова \\
@@ -93,23 +94,47 @@
 
 \section{Эксперимент на смеси гауссовских распределений}
 
-\subsection{Toy Experiment №1}
-Повторим эксперимент из статьи, чтобы показать, что ssm-лосс адекватно оценивает градиент. В качестве модели был использован MLP (Multi-Layer Perceptron) с тремя слоями с размером скрытого 128 и с функцией активации Softplus. Данные генерировались из смеси распределений 
-$\frac{1}{5} \mathcal{N}\left( \left( -5, -5\right), I \right)+\frac{4}{5} \mathcal{N}\left( \left( 5, 5\right), I \right)$. В качестве оптимизатора был взят Adam с lr = 0.001 с размером батча 128. 
+\subsection{Неверная оценка градиента правдоподобия выборки}
+Повторим эксперимент из статьи, чтобы показать, что ssm-лосс адекватно
+оценивает градиент только в областях высокой плотности. В качестве модели был
+использован MLP (Multi-Layer Perceptron) с тремя слоями. Размером скрытого слоя
+128, функция активации Softplus. Данные генерировались из смеси распределений:
+\[
+\frac{1}{5} \mathcal{N}\left( \left( -5, -5\right), I \right)+\frac{4}{5} \mathcal{N}\left( \left( 5, 5\right), I \right)
+\]
+
+В качестве оптимизатора был взят Adam с lr = 0.001 с размером батча 128. 
 
 \begin{figure}[H]
   \centering
-  	\includegraphics[scale=0.5]{fig2a}
-  	\caption{$\Delta_x \log p_{data}$}
+  \begin{subfigure}[b]{0.45\textwidth}
+  	\includegraphics[width=0.95\textwidth]{fig2a}
+  	\caption{$\Delta_x \log p_{data}(x)$ --- истинный градиент логарифма правдоподобия}
   	\label{fig:2a}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\textwidth]{fig2b}
+    \caption{$s_{\theta}(x)$ --- оценка на $\Delta_x \log p_{data}(x)$}
+    \label{fig:2b}
+  \end{subfigure}
+  \caption{Сравнение градиента истинного логарифма правдоподобия с его оценкой
+  MLP сетью, красные области соответствуют области с высоким значеием плотности
+  рассматриваемого распределения}
+  \label{fig:2}
 \end{figure}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.5]{fig2b}
-	\caption{MNIST}
-	\label{fig:2b}
-\end{figure}
+На Рис.~\ref{fig:2} мы можем видеть, что нейронная сеть адекватно оценивает
+градиент $\Delta_x \log p_{data}(x)$ только в области вокруг мод распределения.
+Стрелки указывают в то же направление, что и настоящий градиент плотности.
+
+Значения ожидаемо отличаются в области, где плотность мала.
+
+Стоит отметить, что именно поэтому некорректно было бы использовать обычный
+алгоритм Ланжевена. Плотность рассматриваемого распределения везде ненулевая.
+Однако расстояние между двумя модами сильно большое.
+
+Данный результат полностью сходится с тем, что было получено в статье.
 
 \subsection{Toy Experiment №2}
 
