@@ -28,7 +28,7 @@ def anneal_langevin(probs, means, num, input, sigmas, lr=0.01, step=1000):
             # print(s, sigmas[-1])
             lr_new = lr * np.power(s / sigmas[-1], 2)
             input += lr_new * ds.compute_p_gradient(input).float().detach() / 2
-            input += torch.randn_like(input) * np.sqrt(lr)
+            input += torch.randn_like(input) * np.sqrt(lr_new)
     # print(input)
     return input
 
