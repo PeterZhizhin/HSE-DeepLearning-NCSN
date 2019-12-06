@@ -9,16 +9,23 @@ import toy_cnn
 import remove_target_dataset
 import perturbed_dataset
 import checkpointer
+import generate
 
 logger = logging.getLogger(__name__)
 
 
 class LangevinCNN(object):
-    def __init__(self, n_channels, sigmas: np.array, images_dataset, checkpoint_dir, target_device='cpu', n_processes=0,
+    def __init__(self, n_channels, sigmas: np.array, images_dataset, checkpoint_dir, target_device='cpu',
+                 n_processes=0,
                  batch_size=4,
-                 save_every=1):
+                 save_every=1,
+                 show_every=1,
+                 show_grid_size=8,
+                 ):
         self.target_device = torch.device(target_device)
         self.save_every = save_every
+        self.show_every = show_every
+        self.show_grid_size = show_grid_size
         assert sigmas.ndim == 1
         self.sigmas = torch.tensor(sigmas).float()
         self.n_sigmas = sigmas.shape[0]
@@ -45,7 +52,7 @@ class LangevinCNN(object):
     def restore_with_checkpointer(self):
         checkpoint_file = self.checkpointer.get_latest_checkpoint_file()
         if checkpoint_file is not None:
-            checkpoint = torch.load(checkpoint_file)
+            checkpoint = torch.load(checkpoint_file, map_location=self.target_device)
             self.model.load_state_dict(checkpoint['model'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             return checkpoint['epoch'], checkpoint['niter'], checkpoint['tensorboard_dir']
@@ -75,11 +82,15 @@ class LangevinCNN(object):
         total_loss = torch.mean(loss_times_lambda_sigma)
         return total_loss
 
+    def generate_and_show_images(self, step):
+        image_to_show = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size)
+        self.summary_writer.add_image('generated_annealed_image', image_to_show, step)
+
     def train(self, n_epochs=1):
         num_epochs_iter = len(self.dataloader.dataset) // self.dataloader.batch_size
-        self.model.train(True)
         niter = self.start_niter
         for epoch in range(self.start_epoch, n_epochs + 1):
+            self.model.train()
             denoising_losses = []
             for i, (images) in enumerate(tqdm(
                     self.dataloader, desc='Training epoch {}/{}'.format(epoch, n_epochs), total=num_epochs_iter), 1):
@@ -114,3 +125,10 @@ class LangevinCNN(object):
 
             if epoch % self.save_every == 0:
                 self.save_with_checkpointer(epoch + 1, niter)
+            if epoch % self.show_every == 0:
+                self.generate_and_show_images(epoch + 1)
+
+        logger.info('Showing last images')
+        self.generate_and_show_images(n_epochs + 1)
+
+        self.summary_writer.close()
