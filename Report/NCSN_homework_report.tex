@@ -12,7 +12,7 @@
 %     \usepackage[preprint]{neurips_2018}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
-     \usepackage[final, nonatbib]{nips_2018}
+\usepackage[final, nonatbib]{nips_2018}
 
 % to avoid loading the natbib package, add option nonatbib:
 %     \usepackage[nonatbib]{neurips_2018}
@@ -31,6 +31,28 @@
 \usepackage{float}
 \usepackage{amsfonts,amsmath,amssymb}
 \usepackage{subcaption}
+\usepackage{algorithmicx,algpseudocode,algorithm}
+\usepackage{wrapfig,tikz}
+\usepackage{amsmath,longtable,fancyhdr,booktabs,multirow,graphicx,float}
+\usepackage{adjustbox, bigstrut, tabularx, multirow, makecell, diagbox}
+\usepackage{amssymb,xcolor,amsthm}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{theoremref}
+\usepackage{stmaryrd}
+\usepackage{url}            %
+\usepackage{booktabs}       %
+\usepackage{amsfonts}       %
+\usepackage{nicefrac}       %
+\usepackage{microtype}      %
+\usepackage{caption}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{booktabs} %
+\usepackage{enumitem}
+\usepackage{bm}
+\usepackage{placeins}
 %\usepackage{natbib}
 
 \title{Отчет по воспроизведению статьи "Generative Modeling by Estimating Gradients of the Data Distribution"}
@@ -89,6 +111,9 @@
 В обозреваемой статье предлагается вариант генеративной модели, использующей динамику Ланжевена основанную на оценке градиентов распределения данных с помощью score matching. В качестве архитектуры в модели используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификацией функции активации (ELU).
 
 \subsection{Модель}
+
+В качестве архитектуры в модели используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификацией функции активации (ELU),
+
 
 \subsection{Лосс}
 
@@ -183,39 +208,78 @@ $\nabla_x s_{\theta}(x)$ --- это гессиан логарифма плотн
 
 Данный результат полностью сходится с тем, что было получено в статье.
 
-\subsection{Toy Experiment №2}
+\subsection{Динамика Ланжевена}
+
+Хотим посмотреть на разницу в работе обычного Ланжевена и Ланжевена с отжигом. В алгоритме будем использовать для подсчета честные градиенты. Для этого генерировать данные будем как в предыдущем пункте из смеси Гауссовских распределений. Рисунок~\ref{fig:3a} В качестве начальных точек для обеих динамик будем брать равномерно выбранные токи из квадрата $[-8, 8] \times [-8, 8]$.  Для обычного Ланжевена возьмем  количество шагов 1000, $\varepsilon=0.1$. Рисунок~\ref{fig:3b}. Для Ланжевена с отжигом ~\ref{alg:anneal} 100, $\varepsilon=0.1$. В статье предлагается взять $\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 10, \sigma_{10} = 0.1$. Отметим, что при данных параметрах предложенный  в статье алгоритм динамики Ланжевена с отжигом не сходится. После некоторых экспериментов с параметрами пришли к следующим параметрам:
+$\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 20, \sigma_{10} = 0.7$. Рисунок~\ref{fig:3c}.
+
+Заметим, что обычный Ланжевен плохо угадывает доли событий по компонентам смеси. С другой стороны Ланжевен с отжигом смог уловить соотношение между компонентами. Отметим, что качество работы последнего метода зависят от выбора сигмы. Метод может как не сойтись, так и выдавать результаты в той же мере неверные, как и обычный Ланжевен.
 
 
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{fig3a}
+		\caption{Сэмплирование}
+		\label{fig:3a}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{fig3b}
+		\caption{Динамика Ланжевина}
+		\label{fig:3b}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{fig3c}
+		\caption{Динамика Ланжевена с отжига}
+		\label{fig:3c}
+	\end{subfigure}
+\end{figure}
 
-
-
-
-
-
-
+Данный результат в целом сходится с тем, что было получено в статье, но стоит отметить, что параметры в статье указаны неподходящие.
 
 \subsection{Figures}
 
-%\begin{figure}
-%  \centering
-%  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-%  \caption{Sample figure caption.}
-%\end{figure}
+\section{Реализации на данный момент}
 
-All artwork must be neat, clean, and legible. Lines should be dark enough for
-purposes of reproduction. The figure number and caption always appear after the
-figure. Place one line space before the figure caption and one line space after
-the figure. The figure caption should be lower case (except for first word and
-proper nouns); figures are numbered consecutively.
+Так же кроме предыдущих экспериментов были реализованы методы динамик Ланжевена для генерации картинок.
 
-You may use color figures.  However, it is best for the figure captions and the
-paper body to be legible if the paper is printed in either black/white or in
-color.
+\begin{subfigure}{scale=1}
+	\includegraphics[width=\textwidth]{fig3a}
+	\caption{Сэмплирование}
+	\label{fig:3a}
+\end{subfigure}
 
 
 %\section*{References}
 
 \bibliographystyle{unsrt} 
 \bibliography{rev} 
+
+\section{Appendix}
+
+\begin{wrapfigure}[15]{r}{0.5\textwidth}
+	\vspace{-2.2em}
+	\begin{minipage}{0.5\textwidth}
+		\begin{algorithm}[H]
+			\caption{Annealed Langevin dynamics.}
+			\label{alg:anneal}
+			\begin{algorithmic}[1]
+				\Require{$\{\sigma_i\}_{i=1}^L, \epsilon, T$.}
+				\State{Initialize $\tilde{\bfx}_0$}
+				\For{$i \gets 1$ to $L$}
+				\State{$\alpha_i \gets \epsilon \cdot \sigma_i^2/\sigma_L^2$} \Comment{$\alpha_i$ is the step size.}
+				\For{$t \gets 1$ to $T$}
+				\State{Draw $\bfz_t \sim \mcal{N}(0, I)$}
+				\State{\resizebox{0.75\textwidth}{!}{$\tilde{\bfx}_{t} \gets \tilde{\bfx}_{t-1} + \dfrac{\alpha_i}{2} \bfs_\bftheta(\tilde{\bfx}_{t-1}, \sigma_i) + \sqrt{\alpha_i}~ \bfz_t$}}
+				\EndFor
+				\State{$\tilde{\bfx}_0 \gets \tilde{\bfx}_T$}
+				\EndFor
+				\item[]
+				\Return{$\tilde{\bfx}_T$}
+			\end{algorithmic}
+		\end{algorithm}
+	\end{minipage}
+\end{wrapfigure}
+
 
 \end{document}
