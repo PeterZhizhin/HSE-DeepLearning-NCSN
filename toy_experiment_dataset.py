@@ -61,8 +61,3 @@ class ToyExperimentDataset(torch.utils.data.TensorDataset):
 
         gradient = torch.autograd.grad(outputs=total_prob_sum, inputs=x)[0]
         return gradient
-
-
-
-
-

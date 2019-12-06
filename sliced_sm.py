@@ -1,3 +1,7 @@
+"""
+Sliced SM implementation. Original work presented in https://github.com/ermongroup/sliced_score_matching
+"""
+
 import torch
 import torch.autograd as autograd
 import numpy as np

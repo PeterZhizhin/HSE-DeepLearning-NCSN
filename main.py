@@ -25,8 +25,6 @@ def main():
         shuffle=True,
     )
 
-    model = 
-
     for images, _ in dataloader:
         break
 
