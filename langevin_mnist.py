@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--show_every', type=int, default=1)
     parser.add_argument('--show_grid_size', type=int, default=8)
+    parser.add_argument('--image_dim', type=int, default=32)
     parser.add_argument('--n_processes', nargs='?', default=0)
     parser.add_argument('--target_device', nargs='?', default='cpu')
     return parser.parse_args()
@@ -30,18 +31,20 @@ def main():
     log_level = getattr(logging, args.log.upper())
     logging.basicConfig(level=log_level)
 
+    image_dim = args.image_dim
     dataset = torchvision.datasets.mnist.MNIST(
         args.dataset_folder,
         train=True,
         download=args.download_dataset,
         transform=torchvision.transforms.Compose([
-            torchvision.transforms.Resize(32),
+            torchvision.transforms.Resize(image_dim),
             torchvision.transforms.ToTensor(),
         ]),
     )
 
     sigmas = np.geomspace(args.sigma_start, args.sigma_end, num=args.num_sigmas)
     langevin_model_with_loop = langevin_training_loop.LangevinCNN(1, sigmas, dataset,
+                                                                  image_shape=(image_dim, image_dim),
                                                                   target_device=args.target_device,
                                                                   checkpoint_dir=args.model_path,
                                                                   n_processes=args.n_processes,

@@ -15,7 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class LangevinCNN(object):
-    def __init__(self, n_channels, sigmas: np.array, images_dataset, checkpoint_dir, target_device='cpu',
+    def __init__(self, n_channels,
+                 sigmas: np.array, images_dataset,
+                 image_shape: tuple,
+                 checkpoint_dir, target_device='cpu',
                  n_processes=0,
                  batch_size=4,
                  save_every=1,
@@ -29,6 +32,7 @@ class LangevinCNN(object):
         assert sigmas.ndim == 1
         self.sigmas = torch.tensor(sigmas).float()
         self.n_sigmas = sigmas.shape[0]
+        self.image_shape = (n_channels, ) + image_shape
 
         images_dataset_no_target = remove_target_dataset.DatasetWithoutTarget(images_dataset)
         # images_perturbed_dataset = perturbed_dataset.PerturbedDataset(images_dataset_no_target, sigmas)
@@ -41,9 +45,9 @@ class LangevinCNN(object):
 
         self.model = unet_model.UNet(
             num_sigmas=self.n_sigmas,
-            n_classes=1,
+            n_classes=n_channels,
             feature_levels_num=4,
-            input_ch_size=1,
+            input_ch_size=n_channels,
             filters_increase_factor=2,
             hidden_ch_size=64,
             max_hidden_size=512,
@@ -94,6 +98,7 @@ class LangevinCNN(object):
 
     def generate_and_show_images(self, step):
         image_to_show = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size,
+                                                       image_shape=self.image_shape,
                                                        device=self.target_device)
         self.summary_writer.add_image('generated_annealed_image', image_to_show, step)
 
