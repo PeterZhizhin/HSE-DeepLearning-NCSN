@@ -66,7 +66,7 @@ def generate_MNIST_anneal(model, sigmas, batch, show_image=False, device=None):
     start_point = torch.rand(batch * batch, 1, 28, 28)
     if device:
         start_point = start_point.to(device)
-    after_lan = data_anneal_lavgevin(start_point, model, sigmas, lr=5 * 1e-5, step=100)
+    after_lan = data_anneal_lavgevin(start_point, model, sigmas, lr=5 * 1e-5, step=100, device=device)
     # after_lan = start_point
     grid = make_grid(after_lan, nrow=batch)
     if show_image:
