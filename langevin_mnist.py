@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument('--log', nargs='?', default='INFO')
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--show_every', type=int, default=1)
+    parser.add_argument('--n_epochs', type=int, default=1)
     parser.add_argument('--show_grid_size', type=int, default=8)
     parser.add_argument('--image_dim', type=int, default=32)
     parser.add_argument('--n_processes', nargs='?', default=0)
@@ -52,7 +53,7 @@ def main():
                                                                   save_every=args.save_every,
                                                                   show_every=args.show_every,
                                                                   show_grid_size=args.show_grid_size)
-    langevin_model_with_loop.train()
+    langevin_model_with_loop.train(args.n_epochs)
 
 
 if __name__ == "__main__":
