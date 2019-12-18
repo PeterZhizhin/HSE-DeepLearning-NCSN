@@ -93,7 +93,8 @@ class LangevinCNN(object):
         return total_loss
 
     def generate_and_show_images(self, step):
-        image_to_show = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size)
+        image_to_show = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size,
+                                                       device=self.target_device)
         self.summary_writer.add_image('generated_annealed_image', image_to_show, step)
 
     def train(self, n_epochs=1):
