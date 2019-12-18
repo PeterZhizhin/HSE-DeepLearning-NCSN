@@ -38,7 +38,7 @@ def data_lavgevin(input, model, lr=0.01, step=1000, n_sigma=9):
 
 
 def data_anneal_lavgevin(input, model, sigmas, lr=0.01, step=1000, device=None):
-    # res_im = []
+    res_im = []
     with torch.no_grad():
         for k, s in enumerate(sigmas):
             num_sigmas = torch.ones(input.shape[0]).long() * k
@@ -48,8 +48,9 @@ def data_anneal_lavgevin(input, model, sigmas, lr=0.01, step=1000, device=None):
                 lr_new = lr * np.power(s / sigmas[-1], 2)
                 input += lr_new * model(input, num_sigmas) / 2
                 input += torch.randn_like(input) * np.sqrt(lr_new)
+            res_im.append(input.clone())
     # print(input)
-    return input
+    return input, res_im
 
 
 def generate_MNIST_vanilla(model, batch):  #
@@ -67,9 +68,12 @@ def generate_MNIST_anneal(model, sigmas, batch, show_image=False, device=None, i
     start_point = torch.rand(*generation_shape)
     if device:
         start_point = start_point.to(device)
-    after_lan = data_anneal_lavgevin(start_point, model, sigmas, lr=5 * 1e-5, step=100, device=device)
+    after_lan, res_images = data_anneal_lavgevin(start_point, model, sigmas, lr=5 * 1e-5, step=100, device=device)
     # after_lan = start_point
     grid = make_grid(after_lan, nrow=batch)
+    res_grid = []
+    for images in res_images:
+        res_grid.append(make_grid(images, nrow=batch))
     if show_image:
         imshow(grid)
-    return grid
+    return grid, res_grid

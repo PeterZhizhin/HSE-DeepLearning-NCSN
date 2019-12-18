@@ -32,7 +32,7 @@ class LangevinCNN(object):
         assert sigmas.ndim == 1
         self.sigmas = torch.tensor(sigmas).float()
         self.n_sigmas = sigmas.shape[0]
-        self.image_shape = (n_channels, ) + image_shape
+        self.image_shape = (n_channels,) + image_shape
 
         images_dataset_no_target = remove_target_dataset.DatasetWithoutTarget(images_dataset)
         # images_perturbed_dataset = perturbed_dataset.PerturbedDataset(images_dataset_no_target, sigmas)
@@ -50,8 +50,8 @@ class LangevinCNN(object):
             input_ch_size=n_channels,
             filters_increase_factor=2,
             hidden_ch_size=64,
-            max_hidden_size=512,
-            block_depth=1,
+            max_hidden_size=1024,
+            block_depth=3,
             output_block_depth=2)
         self.model = self.model.to(self.target_device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
@@ -97,10 +97,12 @@ class LangevinCNN(object):
         return total_loss
 
     def generate_and_show_images(self, step):
-        image_to_show = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size,
-                                                       image_shape=self.image_shape,
-                                                       device=self.target_device)
+        image_to_show, all_images = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size,
+                                                                   image_shape=self.image_shape,
+                                                                   device=self.target_device)
         self.summary_writer.add_image('generated_annealed_image', image_to_show, step)
+        for i, image in enumerate(all_images):
+            self.summary_writer.add_image('generated_annealed_image_process', image, step + i)
 
     def train(self, n_epochs=1):
         num_epochs_iter = len(self.dataloader.dataset) // self.dataloader.batch_size
