@@ -46,8 +46,13 @@ def data_anneal_lavgevin(input, model, sigmas, lr=0.01, step=1000, device=None):
                 num_sigmas = num_sigmas.to(device)
             for i in trange(step, desc='Annealed Langevin {}/{}: sigma={}'.format(k + 1, len(sigmas), s)):
                 lr_new = lr * np.power(s / sigmas[-1], 2)
-                input += lr_new * model(input, num_sigmas) / 2
-                input += torch.randn_like(input) * np.sqrt(lr_new)
+                gradient_estimate = model(input, num_sigmas)
+
+                non_noise_update_step = lr_new * gradient_estimate / 2
+                noise_update_step = torch.randn_like(input) * np.sqrt(lr_new)
+                total_update = non_noise_update_step + noise_update_step
+
+                input += total_update
             res_im.append(input.clone())
     # print(input)
     return input, res_im
