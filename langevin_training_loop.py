@@ -50,8 +50,8 @@ class LangevinCNN(object):
             input_ch_size=n_channels,
             filters_increase_factor=2,
             hidden_ch_size=64,
-            max_hidden_size=512,
-            block_depth=1,
+            max_hidden_size=1024,
+            block_depth=3,
             output_block_depth=2)
         self.model = self.model.to(self.target_device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
