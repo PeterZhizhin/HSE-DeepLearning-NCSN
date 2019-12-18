@@ -79,10 +79,12 @@ class LangevinCNN(object):
             'epoch': epoch,
             'niter': niter,
             'tensorboard_dir': self.summary_writer.log_dir,
-            'model': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
         }
         logger.info('Saving checkpoint {}: {}'.format(checkpoint_file, checkpoint))
+        checkpoint.update({
+                'model': self.model.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
+            })
         torch.save(checkpoint, checkpoint_file)
         self.checkpointer.checkpoint_saved(epoch)
 
