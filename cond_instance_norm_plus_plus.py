@@ -1,9 +1,10 @@
 import torch
 from torch import nn
+import with_sigmas_mixin
 
 
-class ConditionalInstanceNormalizationPlusPlus(nn.Module):
-    def __init__(self, num_sigmas, num_channels):
+class ConditionalInstanceNormalizationPlusPlus(nn.Module, with_sigmas_mixin.WithSigmasMixin):
+    def __init__(self, num_channels, num_sigmas):
         super().__init__()
         self.gamma = torch.nn.Parameter(torch.ones(num_sigmas, num_channels, 1, 1), requires_grad=True)
         self.beta = torch.nn.Parameter(torch.zeros(num_sigmas, num_channels, 1, 1), requires_grad=True)

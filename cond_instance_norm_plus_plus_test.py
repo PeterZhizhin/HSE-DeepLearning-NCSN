@@ -7,7 +7,7 @@ import numpy as np
 
 class TestConditionalInstanceNormalizationPlusPlus(TestCase):
     def test_forward_has_correct_shape(self):
-        norm = ConditionalInstanceNormalizationPlusPlus(2, 3)
+        norm = ConditionalInstanceNormalizationPlusPlus(3, 2)
         test_x = torch.ones(8, 3, 16, 16)
         sigmas = torch.from_numpy(np.array([0, 0, 1, 0, 1, 0, 1, 1])).long()
 
@@ -16,7 +16,7 @@ class TestConditionalInstanceNormalizationPlusPlus(TestCase):
         self.assertTupleEqual(test_x.shape, out.shape)
 
     def test_model_has_three_parameters(self):
-        norm = ConditionalInstanceNormalizationPlusPlus(2, 3)
+        norm = ConditionalInstanceNormalizationPlusPlus(3, 2)
         self.assertEqual(len(list(norm.parameters())), 3)
         for param in norm.parameters():
             self.assertEqual(np.prod(param.size()), 2 * 3)

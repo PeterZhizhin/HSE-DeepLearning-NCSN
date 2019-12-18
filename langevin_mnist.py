@@ -34,7 +34,10 @@ def main():
         args.dataset_folder,
         train=True,
         download=args.download_dataset,
-        transform=torchvision.transforms.ToTensor(),
+        transform=torchvision.transforms.Compose([
+            torchvision.transforms.Resize(256),
+            torchvision.transforms.ToTensor(),
+        ]),
     )
 
     sigmas = np.geomspace(args.sigma_start, args.sigma_end, num=args.num_sigmas)

@@ -36,16 +36,6 @@ import numpy as np
 from utils.helpers import maybe_download
 from utils.layer_factory import conv1x1, conv3x3, CRPBlock, RCUBlock
 
-data_info = {
-    21: 'VOC',
-}
-
-models_urls = {
-    '101_voc': 'https://cloudstor.aarnet.edu.au/plus/s/Owmttk9bdPROwc6/download',
-
-    '101_imagenet': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-}
-
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -239,19 +229,3 @@ class RefineNet(nn.Module):
 
         out = self.clf_conv(x1)
         return out
-
-
-def rf101(num_classes, imagenet=False, pretrained=True, **kwargs):
-    model = RefineNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, **kwargs)
-    if imagenet:
-        key = '101_imagenet'
-        url = models_urls[key]
-        model.load_state_dict(maybe_download(key, url), strict=False)
-    elif pretrained:
-        dataset = data_info.get(num_classes, None)
-        if dataset:
-            bname = '101_' + dataset.lower()
-            key = 'rf' + bname
-            url = models_urls[bname]
-            model.load_state_dict(maybe_download(key, url), strict=False)
-    return model

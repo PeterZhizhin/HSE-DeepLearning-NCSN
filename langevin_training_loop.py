@@ -5,7 +5,7 @@ import torch.utils.tensorboard
 from tqdm import tqdm
 import logging
 
-import toy_cnn
+from unet import unet_model
 import remove_target_dataset
 import perturbed_dataset
 import checkpointer
@@ -39,7 +39,17 @@ class LangevinCNN(object):
             pin_memory=self.target_device.type == 'cuda',
         )
 
-        self.model = toy_cnn.ToyCNN(n_channels, 128, self.n_sigmas).to(self.target_device)
+        self.model = unet_model.UNet(
+            num_sigmas=self.n_sigmas,
+            n_classes=1,
+            feature_levels_num=4,
+            input_ch_size=1,
+            filters_increase_factor=2,
+            hidden_ch_size=64,
+            max_hidden_size=512,
+            block_depth=1,
+            output_block_depth=2)
+        self.model = self.model.to(self.target_device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
         self.lambda_sigma_pow = 2
 
