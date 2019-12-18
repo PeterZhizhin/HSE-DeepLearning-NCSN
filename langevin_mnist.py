@@ -35,7 +35,7 @@ def main():
         train=True,
         download=args.download_dataset,
         transform=torchvision.transforms.Compose([
-            torchvision.transforms.Resize(256),
+            torchvision.transforms.Resize(32),
             torchvision.transforms.ToTensor(),
         ]),
     )
