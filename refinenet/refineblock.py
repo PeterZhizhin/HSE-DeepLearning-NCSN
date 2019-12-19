@@ -19,6 +19,8 @@ class RCUBlock(ConvBlock):
 
     @classmethod
     def create_rcu_block(cls, input_ch, output_ch, activation, num_sigmas, num_rcu):
+        if num_rcu == 1:
+            return cls(input_ch, output_ch, activation, num_sigmas)
         blocks = []
         for i in range(num_rcu):
             blocks.append(
@@ -66,12 +68,14 @@ class CRPBlock(nn.Module, WithSigmasMixin):
                     nn.AvgPool2d(kernel_size=pool_size, padding=pool_padding, stride=1),
                     nn.Conv2d(channels, channels, kernel_size=kernel_size, padding=padding)
                 ))
+        self.blocks = nn.ModuleList(self.blocks)
 
     def forward(self, x, sigmas):
         x = self.start_layer(x, sigmas)
 
         result = x
-        for i, rcu_block in enumerate(self.blocks):
+        for i in range(len(self.blocks)):
+            rcu_block = self.blocks[i]
             x = rcu_block(x, sigmas)
             result = result + x
 
