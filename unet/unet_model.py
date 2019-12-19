@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 import logging
-from unet import conv_block
+import conv_block
 from sequential_with_sigmas import SequentialWithSigmas
 import with_sigmas_mixin
 

@@ -6,6 +6,7 @@ from tqdm import tqdm
 import logging
 
 from unet import unet_model
+from refinenet.refinenet import RefineNet
 import remove_target_dataset
 import perturbed_dataset
 import checkpointer
@@ -43,16 +44,7 @@ class LangevinCNN(object):
             pin_memory=self.target_device.type == 'cuda',
         )
 
-        self.model = unet_model.UNet(
-            num_sigmas=self.n_sigmas,
-            n_classes=n_channels,
-            feature_levels_num=4,
-            input_ch_size=n_channels,
-            filters_increase_factor=2,
-            hidden_ch_size=64,
-            max_hidden_size=1024,
-            block_depth=3,
-            output_block_depth=2)
+        self.model = RefineNet(n_channels, 64, torch.nn.ELU, num_sigmas=self.n_sigmas, block_depth=2)
         self.model = self.model.to(self.target_device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
         self.lambda_sigma_pow = 2
@@ -109,6 +101,7 @@ class LangevinCNN(object):
     def train(self, n_epochs=1):
         num_epochs_iter = len(self.dataloader.dataset) // self.dataloader.batch_size
         niter = self.start_niter
+        torch.autograd.set_detect_anomaly(True)
         for epoch in range(self.start_epoch, n_epochs + 1):
             self.model.train()
             denoising_losses = []
