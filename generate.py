@@ -57,6 +57,30 @@ def data_anneal_lavgevin(input, model, sigmas, lr=0.01, step=1000, device=None):
     # print(input)
     return input, res_im
 
+def data_anneal_lavgevin_inpaint(input, target, model, sigmas, lr=0.01, step=1000, device=None):
+    res_im = []
+
+    masked_target = target.view(-1, 3, 32, 32)[..., : 16]
+    input = input.view(-1, 3, 32, 32)
+    with torch.no_grad():
+        for k, s in enumerate(sigmas):
+            num_sigmas = torch.ones(input.shape[0]).long() * k
+            if device:
+                num_sigmas = num_sigmas.to(device)
+            masked = masked_target + torch.randn_like(masked_target) * s
+            for i in trange(step, desc='Annealed Langevin {}/{}: sigma={}'.format(k + 1, len(sigmas), s)):
+                lr_new = lr * np.power(s / sigmas[-1], 2)
+                gradient_estimate = model(input, num_sigmas)
+
+                non_noise_update_step = lr_new * gradient_estimate / 2
+                noise_update_step = torch.randn_like(input) * np.sqrt(lr_new)
+                total_update = non_noise_update_step + noise_update_step
+
+                input += total_update
+                input[..., : 16] = masked
+            res_im.append(input.clone())
+    return input, res_im
+
 
 def generate_MNIST_vanilla(model, batch):  #
     model.eval()
