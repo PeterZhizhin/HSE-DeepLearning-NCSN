@@ -175,6 +175,6 @@ class LangevinCNN(object):
                 start_points_batch, self.model, self.sigmas, lr=5 * 1e-5, step=100, device=self.target_device)
 
             for image_i in range(final_images.shape[0]):
-                image_i_path = images_path / "{}.png".format(current_image_i)
+                image_i_path = images_path / "{:09}.png".format(current_image_i)
                 torchvision.utils.save_image(final_images[image_i], str(image_i_path))
                 current_image_i += 1
