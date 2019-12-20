@@ -8,6 +8,7 @@ import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', default='mnist')
     parser.add_argument('--dataset_folder', default='dataset')
     parser.add_argument('--download_dataset', action='store_true', default=False)
     parser.add_argument('--sigma_start', type=float, default=1)
@@ -26,26 +27,35 @@ def parse_args():
     return parser.parse_args()
 
 
+def create_dataset(args):
+    dataset_parameters_map = {
+        'mnist': (torchvision.datasets.mnist.MNIST, 1, 28, 64),
+        'cifar': (torchvision.datasets.cifar.CIFAR10, 3, 32, 128),
+    }
+    dataset_func, num_channels, image_dim, num_filters = dataset_parameters_map[args.dataset]
+    dataset = dataset_func(
+        args.dataset_folder,
+        train=True,
+        download=args.download_dataset,
+        transform=torchvision.transforms.ToTensor(),
+    )
+    return dataset, num_channels, image_dim, num_filters
+
+
 def main():
     args = parse_args()
 
     log_level = getattr(logging, args.log.upper())
     logging.basicConfig(level=log_level)
 
-    image_dim = args.image_dim
-    dataset = torchvision.datasets.mnist.MNIST(
-        args.dataset_folder,
-        train=True,
-        download=args.download_dataset,
-        transform=torchvision.transforms.Compose([
-            torchvision.transforms.Resize(image_dim),
-            torchvision.transforms.ToTensor(),
-        ]),
-    )
+    dataset, num_channels, image_dim, num_filters = create_dataset(args)
+    image_shape = (num_channels, image_dim, image_dim)
 
     sigmas = np.geomspace(args.sigma_start, args.sigma_end, num=args.num_sigmas)
-    langevin_model_with_loop = langevin_training_loop.LangevinCNN(1, sigmas, dataset,
-                                                                  image_shape=(image_dim, image_dim),
+    langevin_model_with_loop = langevin_training_loop.LangevinCNN(num_filters=num_filters,
+                                                                  sigmas=sigmas,
+                                                                  images_dataset=dataset,
+                                                                  image_shape=image_shape,
                                                                   target_device=args.target_device,
                                                                   checkpoint_dir=args.model_path,
                                                                   n_processes=args.n_processes,

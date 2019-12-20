@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class LangevinCNN(object):
-    def __init__(self, n_channels,
+    def __init__(self,
+                 num_filters: int,
                  sigmas: np.array, images_dataset,
                  image_shape: tuple,
                  checkpoint_dir, target_device='cpu',
@@ -33,7 +34,7 @@ class LangevinCNN(object):
         assert sigmas.ndim == 1
         self.sigmas = torch.tensor(sigmas).float()
         self.n_sigmas = sigmas.shape[0]
-        self.image_shape = (n_channels,) + image_shape
+        self.image_shape = image_shape
 
         images_dataset_no_target = remove_target_dataset.DatasetWithoutTarget(images_dataset)
         # images_perturbed_dataset = perturbed_dataset.PerturbedDataset(images_dataset_no_target, sigmas)
@@ -44,7 +45,7 @@ class LangevinCNN(object):
             pin_memory=self.target_device.type == 'cuda',
         )
 
-        self.model = RefineNet(n_channels, 64, torch.nn.ELU, num_sigmas=self.n_sigmas, block_depth=2)
+        self.model = RefineNet(image_shape[0], num_filters, torch.nn.ELU, num_sigmas=self.n_sigmas, block_depth=2)
         self.model = self.model.to(self.target_device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
         self.lambda_sigma_pow = 2
