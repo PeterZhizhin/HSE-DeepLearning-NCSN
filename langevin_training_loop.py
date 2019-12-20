@@ -3,7 +3,9 @@ import torch
 import torch.utils.data
 import torch.utils.tensorboard
 from tqdm import tqdm
+from pathlib import Path
 import logging
+import torchvision
 
 from unet import unet_model
 from refinenet.refinenet import RefineNet
@@ -11,6 +13,7 @@ import remove_target_dataset
 import perturbed_dataset
 import checkpointer
 import generate
+import random_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,7 @@ class LangevinCNN(object):
 
         images_dataset_no_target = remove_target_dataset.DatasetWithoutTarget(images_dataset)
         # images_perturbed_dataset = perturbed_dataset.PerturbedDataset(images_dataset_no_target, sigmas)
+        self.batch_size = batch_size
         self.dataloader = torch.utils.data.DataLoader(
             images_dataset_no_target,
             batch_size=batch_size, shuffle=True,
@@ -50,6 +54,7 @@ class LangevinCNN(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  # Page 15 of paper
         self.lambda_sigma_pow = 2
 
+        self.checkpoint_dir = checkpoint_dir
         self.checkpointer = checkpointer.Checkpointer(checkpoint_dir)
         self.start_epoch, self.start_niter, tensorboard_dir = self.restore_with_checkpointer()
 
@@ -75,9 +80,9 @@ class LangevinCNN(object):
         }
         logger.info('Saving checkpoint {}: {}'.format(checkpoint_file, checkpoint))
         checkpoint.update({
-                'model': self.model.state_dict(),
-                'optimizer': self.optimizer.state_dict(),
-            })
+            'model': self.model.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+        })
         torch.save(checkpoint, checkpoint_file)
         self.checkpointer.checkpoint_saved(epoch)
 
@@ -146,3 +151,30 @@ class LangevinCNN(object):
         self.generate_and_show_images(n_epochs + 1)
 
         self.summary_writer.close()
+
+    def generate_images(self, num_images):
+        random_shape = (num_images,) + self.image_shape
+        start_points_dataset = random_dataset.RandomDataset(random_shape, torch.rand)
+        start_points_dataloader = torch.utils.data.DataLoader(
+            start_points_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            pin_memory=self.target_device.type == 'cuda',
+        )
+        self.model.eval()
+        total = num_images // self.batch_size
+        current_image_i = 1
+
+        images_path = Path(self.checkpoint_dir) / 'generated_images'
+        images_path.mkdir(parents=True, exist_ok=True)
+        for i, start_points_batch in tqdm(enumerate(start_points_dataloader),
+                                          desc='Generating desired images',
+                                          total=total):
+            start_points_batch = start_points_batch.to(self.target_device)
+            final_images, _ = generate.data_anneal_lavgevin(
+                start_points_batch, self.model, self.sigmas, lr=5 * 1e-5, step=100, device=self.target_device)
+
+            for image_i in range(final_images.shape[0]):
+                image_i_path = images_path / "{}.png".format(current_image_i)
+                torchvision.utils.save_image(final_images[image_i], str(image_i_path))
+                current_image_i += 1

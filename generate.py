@@ -23,9 +23,6 @@ def imshow(inp, title=None):
     plt.show()
 
 
-# plt.pause(0.1)
-
-
 def data_lavgevin(input, model, lr=0.01, step=1000, n_sigma=9):
     # res_im = []
     with torch.no_grad():
