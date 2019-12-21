@@ -181,6 +181,7 @@ class LangevinCNN(object):
 
     def generate_image_generation_process_picture(self, n_images):
         start_point = torch.rand(n_images, *self.image_shape)
+        start_point = start_point.to(self.target_device)
 
         _, generation_process = generate.data_anneal_lavgevin(
             start_point, self.model, self.sigmas, lr=5 * 1e-5, step=100, device=self.target_device)
