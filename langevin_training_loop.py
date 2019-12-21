@@ -196,3 +196,10 @@ class LangevinCNN(object):
 
         save_path = Path(self.checkpoint_dir) / 'generation_process.png'
         torchvision.utils.save_image(generation_image_grid, str(save_path))
+
+    def generate_images_grid(self):
+        image_to_show, _ = generate.generate_MNIST_anneal(self.model, self.sigmas, self.show_grid_size,
+                                                          image_shape=self.image_shape,
+                                                          device=self.target_device)
+        save_path = Path(self.checkpoint_dir) / 'generated_images.png'
+        torchvision.utils.save_image(image_to_show, str(save_path))
