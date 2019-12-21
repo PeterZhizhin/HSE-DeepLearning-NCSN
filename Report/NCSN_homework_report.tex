@@ -50,10 +50,117 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{booktabs} %
-\usepackage{enumitem}
+\usepackage{enumitem} 
 \usepackage{bm}
 \usepackage{placeins}
 %\usepackage{natbib}
+
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\T}{\intercal}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+
+\newcommand{\ud}{\mathrm{d}}
+\newcommand{\up}{\mathrm}
+\def\dbar{\mathrm{\mathchar'26\mkern-12mu d}}
+\newcommand{\wave}{\sim}
+\newcommand{\mcal}{\mathcal}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newtheorem{problem}{Problem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}{Observation}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{assumptions}{Assumptions}
+\newtheorem{definition}{Definition}
+\newtheorem{innercustomthm}{Theorem}
+\newenvironment{customthm}[1]
+{\renewcommand\theinnercustomthm{#1}\innercustomthm}
+{\endinnercustomthm}
+\newtheorem{innercustomlem}{Lemma}
+\newenvironment{customlem}[1]
+{\renewcommand\theinnercustomlem{#1}\innercustomlem}
+{\endinnercustomlem}
+\newtheorem{innercustomhyp}{Hypothesis}
+\newenvironment{customhyp}[1]
+{\renewcommand\theinnercustomhyp{#1}\innercustomhyp}
+{\endinnercustomhyp}
+\newtheorem{innercustomprop}{Proposition}
+\newenvironment{customprop}[1]
+{\renewcommand\theinnercustomprop{#1}\innercustomprop}
+{\endinnercustomprop}
+\newtheorem{innercustomass}{Assumption}
+\newenvironment{customass}[1]
+{\renewcommand\theinnercustomass{#1}\innercustomass}
+{\endinnercustomass}
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+
+\definecolor{Gray}{gray}{0.85}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+
+\newcolumntype{a}{>{\columncolor{Gray}}c}
+\newcolumntype{b}{>{\columncolor{white}}c}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argsup}{arg\,sup}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+
+\makeatletter
+\usepackage{xspace}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+
+\newcommand{\eqnref}[1]{Eq\onedot~\eqref{#1}}
+\newcommand{\figref}[1]{Fig\onedot~\ref{#1}}
+\newcommand{\algoref}[1]{Alg\onedot~\ref{#1}}
+\newcommand{\equref}[1]{Eq\onedot~\eqref{#1}}
+\newcommand{\secref}[1]{Section~\ref{#1}}
+\newcommand{\tabref}[1]{Tab\onedot~\ref{#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{#1}}
+\newcommand{\prgref}[1]{Program~\ref{#1}}
+\newcommand{\appref}[1]{Appendix~\ref{#1}}
+\newcommand{\clmref}[1]{Claim~\ref{#1}}
+\newcommand{\corref}[1]{Corollary~\ref{#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{#1}}
+\newcommand{\propref}[1]{Proposition~\ref{#1}}
+\newcommand{\ptyref}[1]{Property~\ref{#1}}
+\newcommand{\assref}[1]{Assumption~\ref{#1}}
+\newcommand{\bfx}{\mathbf{x}}
+\newcommand{\bfv}{\mathbf{v}}
+\newcommand{\bfz}{\mathbf{z}}
+\newcommand{\bfe}{{\bs{\epsilon}}}
+\newcommand{\bftheta}{{\boldsymbol{\theta}}}
+\newcommand{\bfalpha}{{\boldsymbol{\alpha}}}
+\newcommand{\bfphi}{{\boldsymbol{\phi}}}
+\newcommand{\bfy}{\mathbf{y}}
+\newcommand{\bfs}{\mathbf{s}}
+\newcommand{\bfh}{\mathbf{h}}
+\def\eg{\emph{e.g}\onedot}
+\def\Eg{\emph{E.g}\onedot}
+\def\ie{\emph{i.e}\onedot}
+\def\Ie{\emph{I.e}\onedot}
+\def\cf{\emph{cf}\onedot}
+\def\Cf{\emph{Cf}\onedot}
+\def\etc{\emph{etc}\onedot}
+\def\vs{\emph{vs}\onedot}
+\def\wrt{w.r.t\onedot}
+\def\dof{d.o.f\onedot}
+\def\aka{a.k.a\onedot}
+\def\iid{i.i.d\onedot}
+\def\as{a.s\onedot}
+\def\etal{\emph{et al}\onedot}
+
+\newcommand{\y}[1]{{\color{cyan} [YS: {#1}]}}
+\newcommand{\s}[1]{{\color{magenta} [SE: {#1}]}}
+
+\usepackage[textsize=tiny]{todonotes}
 
 \title{Отчет по воспроизведению статьи "Generative Modeling by Estimating Gradients of the Data Distribution"}
 
@@ -102,17 +209,17 @@
   Данная работа включает в себя результаты попытки воспроизведения статьи 
   "Generative Modeling by Estimating Gradients of the Data Distribution". Финальной целью является получение схожих со статьей результатов. На данный момент работа содержит проверку начальных экспериментов статьи.
   
-  Работа устроена следующим образом, для начала расссмотрим статью, которая является основой для этой работы, далее рассмотрим нашу реализацию определенных частей статьи, подведем результаты о возможности аопсроизведения каждой из частей.
+  Работа устроена следующим образом, для начала рассмотрим статью, которая является основой для этой работы, далее рассмотрим нашу реализацию определенных частей статьи, подведем результаты о возможности аопсроизведения каждой из частей.
 \end{abstract}
 
 
 \section{Обзор статьи}
 
-В обозреваемой статье предлагается вариант генеративной модели, использующей динамику Ланжевена основанную на оценке градиентов распределения данных с помощью score matching. В качестве архитектуры в модели используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификацией функции активации (ELU).
+В обозреваемой статье ~\cite{DBLP:journals/corr/abs-1907-05600} предлагается вариант генеративной модели, использующей динамику Ланжевена основанную на оценке градиентов распределения данных с помощью score matching ~\cite{DBLP:journals/corr/abs-1907-05600}. Часто выясняется, что данные лежат в низкоразмерных многообразиях, в таких случаях градиент невозможно определить вне данного многообразия. Поэтому в статье данные возмущаются различным шумом из Гауссовского распределения.
 
 \subsection{Модель}
 
-В качестве архитектуры в модели используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификацией функции активации (ELU),
+В статье в качестве архитектуры используется модель RefineNet из ~\cite{DBLP:journals/corr/LinMS016} с модификациями.
 
 
 \subsection{Лосс}
@@ -138,8 +245,8 @@ $s_{\theta}(x) \approx \nabla_x \log p_{data}(x)$.
 Первая из них называется Sliced Score Matching: 
 
 \begin{equation}
-    \mathbb{E}_{p_{data}(x)} \mathbb{E}_{p_v} \left[ v^T \nabla_x s_{\theta}(x) v + \frac{1}{2} |s_{\theta}(x)|_2^2 \right]
-    \label{eq:sliced_score_matching}
+\mathbb{E}_{p_{data}(x)} \mathbb{E}_{p_v} \left[ v^T \nabla_x s_{\theta}(x) v + \frac{1}{2} |s_{\theta}(x)|_2^2 \right]
+\label{eq:sliced_score_matching}
 \end{equation}
 
 Для подсчёта этой формулы, мы генерируем случайные вектора $v$. Например, это могут быть стандартные
@@ -152,8 +259,8 @@ $\nabla_x s_{\theta}(x)$ --- это гессиан логарифма плотн
 
 Вторая называется Denoising score matching:
 \begin{equation}
-    \mathbb{E}_{q(\tilde{x} | x)p_{data}(x)} \left[ |s_{\theta}(\tilde{x}) - \nabla_x \log q_{\sigma}(\tilde{x} | x)|_2^2 \right]
-    \label{eq:denoising_score_matching}
+\mathbb{E}_{q(\tilde{x} | x)p_{data}(x)} \left[ |s_{\theta}(\tilde{x}) - \nabla_x \log q_{\sigma}(\tilde{x} | x)|_2^2 \right]
+\label{eq:denoising_score_matching}
 \end{equation}
 
 Тут суть в том, чтобы в данные добавлялся шум $q(\tilde{x} | x)$ с известной
@@ -178,22 +285,22 @@ $\nabla_x s_{\theta}(x)$ --- это гессиан логарифма плотн
 генерацией только одного случайного вектора $v$ для каждого элемента выборки.
 
 \begin{figure}[H]
-  \centering
-  \begin{subfigure}[b]{0.45\textwidth}
-  	\includegraphics[width=0.95\textwidth]{fig2a}
-  	\caption{$\nabla_x \log p_{data}(x)$ --- истинный градиент логарифма правдоподобия}
-  	\label{fig:2a}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\textwidth]{fig2b}
-    \caption{$s_{\theta}(x)$ --- оценка на $\nabla_x \log p_{data}(x)$}
-    \label{fig:2b}
-  \end{subfigure}
-  \caption{Сравнение градиента истинного логарифма правдоподобия с его оценкой
-  MLP сетью, красные области соответствуют области с высоким значеием плотности
-  рассматриваемого распределения}
-  \label{fig:2}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=0.95\textwidth]{fig2a}
+		\caption{$\nabla_x \log p_{data}(x)$ --- истинный градиент логарифма правдоподобия}
+		\label{fig:2a}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.95\textwidth]{fig2b}
+		\caption{$s_{\theta}(x)$ --- оценка на $\nabla_x \log p_{data}(x)$}
+		\label{fig:2b}
+	\end{subfigure}
+	\caption{Сравнение градиента истинного логарифма правдоподобия с его оценкой
+		MLP сетью, красные области соответствуют области с высоким значеием плотности
+		рассматриваемого распределения}
+	\label{fig:2}
 \end{figure}
 
 На Рис.~\ref{fig:2} мы можем видеть, что нейронная сеть адекватно оценивает
@@ -208,10 +315,11 @@ $\nabla_x s_{\theta}(x)$ --- это гессиан логарифма плотн
 
 Данный результат полностью сходится с тем, что было получено в статье.
 
+
 \subsection{Динамика Ланжевена}
 
-Хотим посмотреть на разницу в работе обычного Ланжевена и Ланжевена с отжигом. В алгоритме будем использовать для подсчета честные градиенты. Для этого генерировать данные будем как в предыдущем пункте из смеси Гауссовских распределений. Рисунок~\ref{fig:3a} В качестве начальных точек для обеих динамик будем брать равномерно выбранные токи из квадрата $[-8, 8] \times [-8, 8]$.  Для обычного Ланжевена возьмем  количество шагов 1000, $\varepsilon=0.1$. Рисунок~\ref{fig:3b}. Для Ланжевена с отжигом ~\ref{alg:anneal} 100, $\varepsilon=0.1$. В статье предлагается взять $\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 10, \sigma_{10} = 0.1$. Отметим, что при данных параметрах предложенный  в статье алгоритм динамики Ланжевена с отжигом не сходится. После некоторых экспериментов с параметрами пришли к следующим параметрам:
-$\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 20, \sigma_{10} = 0.7$. Рисунок~\ref{fig:3c}.
+Хотим посмотреть на разницу в работе обычного Ланжевена и Ланжевена с отжигом. В алгоритме будем использовать для подсчета честные градиенты. Для этого генерировать данные будем как в предыдущем пункте из смеси Гауссовских распределений. Рис.~\ref{fig:3a} В качестве начальных точек для обеих динамик будем брать равномерно выбранные точки из квадрата $[-8, 8] \times [-8, 8]$.  Для обычного Ланжевена возьмем 1000 шагов, $\varepsilon=0.1$. Рис.~\ref{fig:3b}. Для Ланжевена с отжигом (алгоритм~\ref{alg:anneal}) 100 шагов, $\varepsilon=0.1$. В статье предлагается взять $\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 10, \sigma_{10} = 0.1$. Отметим, что при данных параметрах предложенный  в статье алгоритм динамики Ланжевена с отжигом не сходится. После некоторых экспериментов с параметрами пришли к следующим параметрам: 
+$\sigma_i$ из геометрической прогрессии, где $\sigma_{1} = 20, \sigma_{10} = 0.7$. Рис.~\ref{fig:3c}.
 
 Заметим, что обычный Ланжевен плохо угадывает доли событий по компонентам смеси. С другой стороны Ланжевен с отжигом смог уловить соотношение между компонентами. Отметим, что качество работы последнего метода зависят от выбора сигмы. Метод может как не сойтись, так и выдавать результаты в той же мере неверные, как и обычный Ланжевен.
 
@@ -237,7 +345,6 @@ $\sigma_i$ из геометрической прогрессии, где $\sigm
 
 Данный результат в целом сходится с тем, что было получено в статье, но стоит отметить, что параметры в статье указаны неподходящие.
 
-\subsection{Figures}
 
 \section{Реализации на данный момент}
 
@@ -266,11 +373,70 @@ $L$ --- это количество различных шумов, которы�
 Так же кроме предыдущих экспериментов были реализованы методы динамик Ланжевена для генерации картинок.
 
 
-%\section*{References}
 
+\subsection{Простая модель}
+
+Составим простую модель, состоящую из 3х сверточных слоев с CondInstanceNorm++ (предыдущий пункт) и активационной функцией ELU между ними. Обучим ее на датасете MNIST
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{loss}
+	\caption{SSM loss на простой модели}
+	\label{fig:loss}
+\end{figure}
+
+Заметим, что она сошлась.
+
+
+\subsection{Ланжевен для картинок}
+
+Так же кроме предыдущих экспериментов были реализованы методы динамик Ланжевена для генерации картинок. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=5]{mnist}
+	\caption{Результат на простой модели}
+	\label{fig:mnist}
+\end{figure}
+
+Результаты на простой модели не удовлетворительные. 
+
+\subsection{Планируется}
+
+Весь код кроме сложной модели и предобработки CIFAR-10 завершен.
+
+В дальнейшей работе планируется внедрение модификаций в модель RefineNet ~\cite{DBLP:journals/corr/LinMS016}, их часть уже реализована(описано выше).  А так же получение результатов на датасетах MNIST и CIFAR-10.
+
+\newpage
 \bibliographystyle{unsrt} 
 \bibliography{rev} 
 
+
 \section{Appendix}
+
+\begin{wrapfigure}[15]{r}{0.5\textwidth}
+	\vspace{-2.2em}
+	\begin{minipage}{0.5\textwidth}
+		\begin{algorithm}[H]
+			\caption{Annealed Langevin dynamics.}
+			\label{alg:anneal}
+			\begin{algorithmic}[1]
+				\Require{$\{\sigma_i\}_{i=1}^L, \epsilon, T$.}
+				\State{Initialize $\tilde{\bfx}_0$}
+				\For{$i \gets 1$ to $L$}
+				\State{$\alpha_i \gets \epsilon \cdot \sigma_i^2/\sigma_L^2$} \Comment{$\alpha_i$ is the step size.}
+				\For{$t \gets 1$ to $T$}
+				\State{Draw $\bfz_t \sim \mcal{N}(0, I)$}
+				\State{\resizebox{0.75\textwidth}{!}{$\tilde{\bfx}_{t} \gets \tilde{\bfx}_{t-1} + \dfrac{\alpha_i}{2} \bfs_\bftheta(\tilde{\bfx}_{t-1}, \sigma_i) + \sqrt{\alpha_i}~ \bfz_t$}}
+				\EndFor
+				\State{$\tilde{\bfx}_0 \gets \tilde{\bfx}_T$}
+				\EndFor
+				\item[]
+				\Return{$\tilde{\bfx}_T$}
+			\end{algorithmic}
+		\end{algorithm}
+	\end{minipage}
+\end{wrapfigure}
+
 
 \end{document}
