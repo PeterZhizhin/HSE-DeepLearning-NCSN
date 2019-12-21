@@ -153,7 +153,17 @@ class LangevinCNN(object):
         self.summary_writer.close()
 
     def generate_images(self, num_images):
-        random_shape = (num_images,) + self.image_shape
+        self.model.eval()
+        images_path = Path(self.checkpoint_dir) / 'generated_images'
+        images_path.mkdir(parents=True, exist_ok=True)
+        all_generated_images = sorted(images_path.glob('*.png'))
+        current_image_i = int(all_generated_images[-1].name.replace('.png', '')) if all_generated_images else 0
+        if current_image_i >= num_images:
+            logger.info('Skipping images generation. All images are already generated.')
+            return
+
+        images_left = num_images - current_image_i
+        random_shape = (images_left,) + self.image_shape
         start_points_dataset = random_dataset.RandomDataset(random_shape, torch.rand)
         start_points_dataloader = torch.utils.data.DataLoader(
             start_points_dataset,
@@ -161,12 +171,9 @@ class LangevinCNN(object):
             shuffle=False,
             pin_memory=self.target_device.type == 'cuda',
         )
-        self.model.eval()
-        total = num_images // self.batch_size
-        current_image_i = 1
+        total = images_left // self.batch_size
 
-        images_path = Path(self.checkpoint_dir) / 'generated_images'
-        images_path.mkdir(parents=True, exist_ok=True)
+        current_image_i += 1
         for i, start_points_batch in tqdm(enumerate(start_points_dataloader),
                                           desc='Generating desired images',
                                           total=total):
