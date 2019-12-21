@@ -10,8 +10,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='mnist')
     parser.add_argument('--dataset_folder', default='dataset')
-    parser.add_argument('--evaluate', action='store_true', default=False)
-    parser.add_argument('--n_generate', type=int, default=5 * 10 ** 4)
+    parser.add_argument('--mode', default='train')
+    parser.add_argument('--n_generate', type=int, default=2)
     parser.add_argument('--download_dataset', action='store_true', default=False)
     parser.add_argument('--sigma_start', type=float, default=1)
     parser.add_argument('--sigma_end', type=float, default=0.01)
@@ -65,9 +65,11 @@ def main():
                                                                   save_every=args.save_every,
                                                                   show_every=args.show_every,
                                                                   show_grid_size=args.show_grid_size)
-    if args.evaluate:
+    if args.mode == 'evaluate':
         langevin_model_with_loop.generate_images(args.n_generate)
-    else:
+    elif args.mode == 'generation_process':
+        langevin_model_with_loop.generate_image_generation_process_picture(args.n_generate)
+    elif args.mode == 'train':
         langevin_model_with_loop.train(args.n_epochs)
 
 

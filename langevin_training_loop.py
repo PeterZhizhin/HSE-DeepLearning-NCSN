@@ -178,3 +178,20 @@ class LangevinCNN(object):
                 image_i_path = images_path / "{:09}.png".format(current_image_i)
                 torchvision.utils.save_image(final_images[image_i], str(image_i_path))
                 current_image_i += 1
+
+    def generate_image_generation_process_picture(self, n_images):
+        start_point = torch.rand(n_images, *self.image_shape)
+
+        _, generation_process = generate.data_anneal_lavgevin(
+            start_point, self.model, self.sigmas, lr=5 * 1e-5, step=100, device=self.target_device)
+        generation_process_stacked = torch.stack(generation_process)
+
+        image_then_generation_process = generation_process_stacked.transpose(1, 0)
+        image_then_generation_process = image_then_generation_process.reshape(
+            -1, *image_then_generation_process.shape[2:])
+
+        generation_image_grid = torchvision.utils.make_grid(
+            image_then_generation_process, nrow=self.n_sigmas)
+
+        save_path = Path(self.checkpoint_dir) / 'generation_process.png'
+        torchvision.utils.save_image(generation_image_grid, str(save_path))
