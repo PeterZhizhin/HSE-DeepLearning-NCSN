@@ -69,6 +69,8 @@ def main():
         langevin_model_with_loop.generate_images(args.n_generate)
     elif args.mode == 'generation_process':
         langevin_model_with_loop.generate_image_generation_process_picture(args.n_generate)
+    elif args.mode == 'generate_images_grid':
+        langevin_model_with_loop.generate_images_grid()
     elif args.mode == 'train':
         langevin_model_with_loop.train(args.n_epochs)
 
