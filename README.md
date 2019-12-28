@@ -12,7 +12,7 @@ The work has been done by Petr Zhizhin (piter.zh@gmail.com) and Dayana Savostyan
 ## Results
 
 The final report about the recreation is available in Russian language.
-You can read it in the repository here: [](https://github.com/PeterZhizhin/HSE-DeepLearning-NCSN/blob/master/Report/NCSN_homework_report.pdf).
+You can read it in the repository [here](https://github.com/PeterZhizhin/HSE-DeepLearning-NCSN/blob/master/Report/NCSN_homework_report.pdf).
 
 ### MNIST
 
